@@ -15,7 +15,7 @@ object ShopListRepositoryImpl:ShopListRepository {
 
     init {
         for (i in 0 until 10){
-            val item = ShopItem("Name",i,true)
+            val item = ShopItem("Name$i",i,true)
             addShopListItem(item)
         }
     }
@@ -41,7 +41,7 @@ object ShopListRepositoryImpl:ShopListRepository {
     }
 
     override fun getShopItem(shopItemId: Int): ShopItem {
-        return shopList.find { it.id == shopItemId } ?: throw RuntimeException("element with id")
+        return shopList.find { it.id == shopItemId } ?: throw RuntimeException("element with id not found")
     }
 
     override fun getShopList(): LiveData<List<ShopItem>> {
