@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">AndreySumin</string>
+    <string name="save">save</string>
+    <string name="error_input_name">error input name</string>
+    <string name="error_input_size">error input size</string>
 </resources>

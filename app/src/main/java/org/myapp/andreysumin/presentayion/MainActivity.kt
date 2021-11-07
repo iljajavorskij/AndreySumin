@@ -1,16 +1,16 @@
 package org.myapp.andreysumin.presentayion
 
+
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.myapp.andreysumin.R
-import org.myapp.andreysumin.domain.ShopItem
+
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,7 +24,13 @@ class MainActivity : AppCompatActivity() {
         recycler()
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
         viewModel.shopList.observe(this){
-            shopItemAdapter.shopList = it
+            shopItemAdapter.submitList(it)
+        }
+
+        val button_add = findViewById<FloatingActionButton>(R.id.floatingActionButton)
+        button_add.setOnClickListener {
+            val intent = ShopItemActivity.intentForAdd(this)
+            startActivity(intent)
         }
     }
 
@@ -57,7 +63,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val item = shopItemAdapter.shopList[viewHolder.adapterPosition]
+                val item = shopItemAdapter.currentList[viewHolder.adapterPosition]
                 viewModel.removeListItem(item)
             }
         }
@@ -68,6 +74,8 @@ class MainActivity : AppCompatActivity() {
     private fun setupClick() {
         shopItemAdapter.onShopItemClickListener = {
             Log.d("MainActivity", it.toString())
+            val intent = ShopItemActivity.intentForEdit(this, it.id)
+            startActivity(intent)
         }
     }
 

@@ -3,6 +3,7 @@ package org.myapp.andreysumin.presentayion
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ListAdapter
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
@@ -10,15 +11,9 @@ import androidx.recyclerview.widget.RecyclerView
 import org.myapp.andreysumin.R
 import org.myapp.andreysumin.domain.ShopItem
 
-class ShopItemAdapter :RecyclerView.Adapter<ShopItemAdapter.ShopItemViewHolder>(){
+class ShopItemAdapter : androidx.recyclerview.widget.ListAdapter<ShopItem,ShopItemAdapter.ShopItemViewHolder>(ShopItemListCallback()){
 
-    var shopList = listOf<ShopItem>()
-    set(value) {
-        val callback = ShopItemDiffCallback(shopList,value)
-        val result = DiffUtil.calculateDiff(callback)
-        result.dispatchUpdatesTo(this)
-        field = value
-    }
+
 
     var onShopItemLongClickListener: ((ShopItem) -> Unit)? = null
     var onShopItemClickListener: ((ShopItem) -> Unit)? = null
@@ -42,7 +37,7 @@ class ShopItemAdapter :RecyclerView.Adapter<ShopItemAdapter.ShopItemViewHolder>(
     }
 
     override fun onBindViewHolder(holder: ShopItemViewHolder, position: Int) {
-        val shopItem = shopList[position]
+        val shopItem = getItem(position)
         holder.itemView.setOnLongClickListener {
             onShopItemLongClickListener?.invoke(shopItem)
             true
@@ -54,20 +49,9 @@ class ShopItemAdapter :RecyclerView.Adapter<ShopItemAdapter.ShopItemViewHolder>(
         holder.sizeCard.text = shopItem.count.toString()
     }
 
-    override fun onViewRecycled(holder: ShopItemViewHolder) {
-        super.onViewRecycled(holder)
-        holder.nameCard.text = ""
-        holder.sizeCard.text = ""
-        holder.nameCard.setTextColor(ContextCompat.getColor(holder.itemView.context, android.R.color.white))
-    }
-
-    override fun getItemCount(): Int {
-        return shopList.size
-    }
-
     override fun getItemViewType(position: Int): Int {
 
-        val item = shopList[position]
+        val item = getItem(position)
         return if (item.enable){
             VIEW_TYPE_ENABLED
         }else{
