@@ -45,7 +45,7 @@ object ShopListRepositoryImpl:ShopListRepository {
     }
 
     override fun getShopList(): LiveData<List<ShopItem>> {
-        return shopListLD //метод тулст вызывается ля того чтобы возвращать копию коллекии а не оригинал что бы нельзя было менять оригинал
+        return shopListLD
     }
 
 
