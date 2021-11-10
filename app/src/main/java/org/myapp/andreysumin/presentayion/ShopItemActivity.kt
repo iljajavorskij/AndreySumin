@@ -20,7 +20,10 @@ class ShopItemActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_shop_item)
         parsIntent()
-        addRightMode()
+        if (savedInstanceState == null){
+            addRightMode()
+        }
+
 
     }
 
@@ -51,7 +54,7 @@ private fun parsIntent(){
         }
         supportFragmentManager
             .beginTransaction()
-            .add(R.id.shop_item_container,fragment)
+            .replace(R.id.shop_item_container,fragment)
             .commit()
     }
 
