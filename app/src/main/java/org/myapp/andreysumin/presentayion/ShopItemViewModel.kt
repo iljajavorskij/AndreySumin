@@ -31,7 +31,7 @@ class ShopItemViewModel:ViewModel() {
         get() = _shopItem
 
     private val _closeScreen = MutableLiveData<Unit>()
-    val closeScreen: LiveData<Unit>
+    val  closeScreen: LiveData<Unit>
         get() = _closeScreen
 
 

@@ -20,6 +20,7 @@ import org.myapp.andreysumin.domain.ShopItem
 class ShopItemFragment() : Fragment() {
 
     private lateinit var viewModel: ShopItemViewModel
+    lateinit var onEditingFinishedListener: onEditingFinishedListener
 
     private lateinit var tilName: TextInputLayout
     private lateinit var tilSize: TextInputLayout
@@ -29,6 +30,15 @@ class ShopItemFragment() : Fragment() {
 
     private var screenMode = MODE_UNKNOWN
     private var shopItemId = ShopItem.UNDEFINED_ID
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is onEditingFinishedListener){
+            onEditingFinishedListener = context
+        }else{
+            throw java.lang.RuntimeException("Activity must implement onEditingFinishedListener")
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +55,7 @@ class ShopItemFragment() : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState) 
+        super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[ShopItemViewModel::class.java]
         initViews(view)
         addChangeTextListeners()
@@ -90,10 +100,12 @@ class ShopItemFragment() : Fragment() {
         }
 
         viewModel.closeScreen.observe(viewLifecycleOwner){
-            activity?.onBackPressed()// не проверяет под капотом на ноль и нужно обрабатывать в ручную
+            onEditingFinishedListener.onEditingFinished()// не проверяет под капотом на ноль и нужно обрабатывать в ручную
            // requireActivity().onBackPressed() проверяет под капотом на ноль и приложения крашится
         }
     }
+
+
 
     private fun parsParams(){
         val args = requireArguments()
@@ -158,6 +170,7 @@ class ShopItemFragment() : Fragment() {
         })
     }
 
+
     companion object {
         private const val SCREEN_MODE = "extra_mode"
         private const val MODE_ADD = "mode add"
@@ -183,6 +196,13 @@ class ShopItemFragment() : Fragment() {
             }
         }
 
+        interface onEditingFinishedListener{
+            fun onEditingFinished()
+        }
+
+
+
 
 }
+
 }

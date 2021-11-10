@@ -4,6 +4,7 @@ package org.myapp.andreysumin.presentayion
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.ViewModelProvider
@@ -14,7 +15,7 @@ import org.myapp.andreysumin.R
 
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(),ShopItemFragment.Companion.onEditingFinishedListener{
 
     private lateinit var viewModel: MainViewModel
     lateinit var shopItemAdapter: ShopItemAdapter
@@ -109,6 +110,11 @@ class MainActivity : AppCompatActivity() {
         shopItemAdapter.onShopItemLongClickListener = {
             viewModel.changeEnableState(it)
         }
+    }
+
+    override fun onEditingFinished() {
+        Toast.makeText(this,"Success", Toast.LENGTH_LONG).show()
+        supportFragmentManager.popBackStack()
     }
 
 

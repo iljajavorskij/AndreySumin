@@ -8,7 +8,7 @@ import org.myapp.andreysumin.R
 import org.myapp.andreysumin.domain.ShopItem
 
 
-class ShopItemActivity : AppCompatActivity() {
+class ShopItemActivity : AppCompatActivity(),ShopItemFragment.Companion.onEditingFinishedListener {
 
     private var screenMode = MODE_UNKNOWN
     private var shopItemId = ShopItem.UNDEFINED_ID
@@ -83,5 +83,9 @@ private fun parsIntent(){
 
     }
 
-
+    override fun onEditingFinished() {
+        finish()
     }
+
+
+}
