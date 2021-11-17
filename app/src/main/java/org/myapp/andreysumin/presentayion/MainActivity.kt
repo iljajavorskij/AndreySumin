@@ -12,29 +12,28 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.myapp.andreysumin.R
-
+import org.myapp.andreysumin.databinding.ActivityMainBinding
 
 
 class MainActivity : AppCompatActivity(),ShopItemFragment.Companion.onEditingFinishedListener{
 
     private lateinit var viewModel: MainViewModel
     lateinit var shopItemAdapter: ShopItemAdapter
+    lateinit var mBinding:ActivityMainBinding
 
-    private var shopItemContainer:FragmentContainerView? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        shopItemContainer = findViewById(R.id.shop_item_container)
+        mBinding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(mBinding.root)
         recycler()
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
         viewModel.shopList.observe(this){
             shopItemAdapter.submitList(it)
         }
 
-        val button_add = findViewById<FloatingActionButton>(R.id.floatingActionButton)
-        button_add.setOnClickListener {
+        mBinding.floatingActionButton.setOnClickListener {
 
             if(isOnePaneMode()){
                 val intent = ShopItemActivity.intentForAdd(this)
@@ -46,8 +45,7 @@ class MainActivity : AppCompatActivity(),ShopItemFragment.Companion.onEditingFin
     }
 
     fun recycler(){
-        val recyclerView = findViewById<RecyclerView>(R.id.recyclerview)
-        with(recyclerView){
+        with(mBinding.recyclerview){
             shopItemAdapter = ShopItemAdapter()
             adapter = shopItemAdapter
             recycledViewPool.setMaxRecycledViews(ShopItemAdapter.VIEW_TYPE_ENABLED,
@@ -57,11 +55,11 @@ class MainActivity : AppCompatActivity(),ShopItemFragment.Companion.onEditingFin
         }
         setupLongClick()
         setupClick()
-        setupSwipe(recyclerView)
+        setupSwipe(mBinding.recyclerview )
     }
 
     private fun isOnePaneMode() :Boolean{
-        return shopItemContainer == null
+        return mBinding.shopItemContainer == null
     }
 
     private fun launchFragment(fragment:Fragment){

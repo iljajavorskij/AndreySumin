@@ -6,9 +6,13 @@ import android.view.ViewGroup
 import android.widget.ListAdapter
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.databinding.DataBindingUtil
+import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import org.myapp.andreysumin.R
+import org.myapp.andreysumin.databinding.ItemCardEnabledBinding
+import org.myapp.andreysumin.databinding.ItemCardUnenableBinding
 import org.myapp.andreysumin.domain.ShopItem
 
 class ShopItemAdapter : androidx.recyclerview.widget.ListAdapter<ShopItem,ShopItemAdapter.ShopItemViewHolder>(ShopItemListCallback()){
@@ -19,7 +23,7 @@ class ShopItemAdapter : androidx.recyclerview.widget.ListAdapter<ShopItem,ShopIt
     var onShopItemClickListener: ((ShopItem) -> Unit)? = null
 
 
-    class ShopItemViewHolder(itemView:View):RecyclerView.ViewHolder(itemView){
+    class ShopItemViewHolder(val binding:ViewDataBinding):RecyclerView.ViewHolder(binding.root){
         val nameCard = itemView.findViewById<TextView>(R.id.name)
         val sizeCard = itemView.findViewById<TextView>(R.id.size)
     }
@@ -31,22 +35,38 @@ class ShopItemAdapter : androidx.recyclerview.widget.ListAdapter<ShopItem,ShopIt
             else -> throw RuntimeException("Unknown view type $viewType")
 
         }
-        val view = LayoutInflater.from(parent.context).
-        inflate(layout,parent,false)
-        return ShopItemViewHolder(view)
+        val binding = DataBindingUtil.inflate<ViewDataBinding>(
+            LayoutInflater.from(parent.context)
+            ,layout
+            ,parent
+            ,false)
+
+
+        return ShopItemViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ShopItemViewHolder, position: Int) {
         val shopItem = getItem(position)
-        holder.itemView.setOnLongClickListener {
+        val binding = holder.binding
+        binding.root.setOnLongClickListener {
             onShopItemLongClickListener?.invoke(shopItem)
             true
         }
-        holder.itemView.setOnClickListener {
+        binding.root.setOnClickListener {
             onShopItemClickListener?.invoke(shopItem)
         }
-        holder.nameCard.text = shopItem.name
-        holder.sizeCard.text = shopItem.count.toString()
+
+        when (binding){
+            is ItemCardEnabledBinding -> {
+                holder.nameCard.text = shopItem.name
+                holder.sizeCard.text = shopItem.count.toString()
+            }
+            is ItemCardUnenableBinding -> {
+                holder.nameCard.text = shopItem.name
+                holder.sizeCard.text = shopItem.count.toString()
+            }
+        }
+
     }
 
     override fun getItemViewType(position: Int): Int {
