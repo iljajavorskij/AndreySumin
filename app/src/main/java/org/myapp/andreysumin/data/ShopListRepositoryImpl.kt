@@ -1,56 +1,52 @@
 package org.myapp.andreysumin.data
 
+import android.app.Application
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import org.myapp.andreysumin.domain.ShopItem
 import org.myapp.andreysumin.domain.ShopListRepository
 import kotlin.random.Random
 
-object ShopListRepositoryImpl:ShopListRepository {
+class ShopListRepositoryImpl(
+    application: Application
+):ShopListRepository {
 
-    private val shopListLD = MutableLiveData<List<ShopItem>>()
+    private val shopItemDao = AppDataBase.getInstanse(application).shopListDao()
+    private val mapper = ShopItemMapper()
 
-    private val shopList = sortedSetOf<ShopItem>({o1,o2 -> o1.id.compareTo(o2.id)})
+     override suspend fun addShopListItem(shopItem: ShopItem) {
+        shopItemDao.addShopItem(mapper.mapEntityToDbModel(shopItem))
+    }
 
-    private var autoIncrementId = 0
+    override suspend fun removeShopList(shopItem: ShopItem) {
+       shopItemDao.deleteShopItem(shopItem.id)
+    }
 
-    init {
-        for (i in 0 until 100){
-            val item = ShopItem("Name$i",i, Random.nextBoolean())
-            addShopListItem(item)
+    override suspend fun editShopItem(shopItem: ShopItem) {
+        shopItemDao.addShopItem(mapper.mapEntityToDbModel(shopItem))
+    }
+
+    override suspend fun getShopItem(shopItemId: Int): ShopItem {
+        val dbModel = shopItemDao.getShopItem(shopItemId)
+        return mapper.mapDbModelToEntity(dbModel)
+    }
+
+    override fun getShopList(): LiveData<List<ShopItem>> =  MediatorLiveData<List<ShopItem>>().apply {
+    //с помощью класса медиатор мы переватываем лайфдату и преобразовываем ее в лайфдату другого типа
+        addSource(shopItemDao.getShopList()){
+            value = mapper.mapListDbModelToListEntity(it)
         }
-    }
-
-    override fun addShopListItem(shopItem: ShopItem) {
-        if (shopItem.id == ShopItem.UNDEFINED_ID){
-            shopItem.id = autoIncrementId++
+        //Метод из класса транформйшн.мап сделает тоже самое под капотом так же вызывается
+    // Медиатор лайф дата ему передается ресурс для считывания и когда он получает значеие его можно преобразовать с помощью мапера
+       // override fun getShopList(): LiveData<List<ShopItem>> = Transformations.map(shopItemDao.getShopList()){
+         //   mapper.mapListDbModelToListEntity(it)
         }
-        shopList.add(shopItem)
-        updateShopList()
-    }
 
-    override fun removeShopList(shopItem: ShopItem) {
-        shopList.remove(shopItem)
-        updateShopList()
-    }
-
-    override fun editShopItem(shopItem: ShopItem) {
-        val oldListItem = getShopItem(shopItem.id)
-        shopList.remove(oldListItem)
-        addShopListItem(shopItem)
-    }
-
-    override fun getShopItem(shopItemId: Int): ShopItem {
-        return shopList.find { it.id == shopItemId } ?: throw RuntimeException("element with id not found")
-    }
-
-    override fun getShopList(): LiveData<List<ShopItem>> {
-        return shopListLD
     }
 
 
 
-    private fun updateShopList(){
-        shopListLD.value = shopList.toList()
-    }
-}
+
+

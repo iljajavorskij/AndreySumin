@@ -1,8 +1,14 @@
 package org.myapp.andreysumin.presentayion
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import org.myapp.andreysumin.data.ShopListRepositoryImpl
 import org.myapp.andreysumin.domain.AddShopItemUseCase
 import org.myapp.andreysumin.domain.EditShopItemUseCase
@@ -10,8 +16,11 @@ import org.myapp.andreysumin.domain.GetShopItemUseCase
 import org.myapp.andreysumin.domain.ShopItem
 import java.lang.Exception
 
-class ShopItemViewModel:ViewModel() {
-    val repository = ShopListRepositoryImpl
+class ShopItemViewModel(application: Application): AndroidViewModel(application) {
+
+    val repository = ShopListRepositoryImpl(application)
+
+    private val scope = CoroutineScope(Dispatchers.Main)
 
     private val getShopItemUseCase = GetShopItemUseCase(repository)
     private val addShopItemUseCase = AddShopItemUseCase(repository)
@@ -37,33 +46,40 @@ class ShopItemViewModel:ViewModel() {
 
 
     fun getShopItem(shopItemId: Int){
-        val item = getShopItemUseCase.getShopItem(shopItemId)
-        _shopItem.value = item
-    }
-
-    fun addShopItem(inputName: String?,inputSize: String?){
-        val name = parsName(inputName)
-        val size = parsSize(inputSize)
-        val fieldsValid = validateInput(name,size)
-        if (fieldsValid) {
-            val shopItem = ShopItem(name,size,true)
-            addShopItemUseCase.addShopListItem(shopItem)
-            finishWork()
+        viewModelScope.launch {
+            val item = getShopItemUseCase.getShopItem(shopItemId)
+            _shopItem.postValue(item)
         }
 
     }
 
-    fun editShopItem(inputName: String?,inputSize: String?){
-        val name = parsName(inputName)
-        val size = parsSize(inputSize)
-        val fieldsValid = validateInput(name,size)
-        if (fieldsValid) {
-            _shopItem.value?.let {
-                val item = it.copy(name = name,count = size)
-                editShopItemUseCase.editShopItem(item)
-                finishWork()
-            }
+    fun addShopItem(inputName: String?,inputSize: String?){
 
+            val name = parsName(inputName)
+            val size = parsSize(inputSize)
+            val fieldsValid = validateInput(name,size)
+            if (fieldsValid) {
+                scope.launch {
+                    val shopItem = ShopItem(name,size,true)
+                    addShopItemUseCase.addShopListItem(shopItem)
+                    finishWork()
+                }
+            }
+    }
+
+    fun editShopItem(inputName: String?,inputSize: String?){
+
+            val name = parsName(inputName)
+            val size = parsSize(inputSize)
+            val fieldsValid = validateInput(name,size)
+            if (fieldsValid) {
+                _shopItem.value?.let {
+                    viewModelScope.launch {
+                        val item = it.copy(name = name,count = size)
+                        editShopItemUseCase.editShopItem(item)
+                        finishWork()
+                    }
+                }
         }
     }
 
@@ -104,8 +120,10 @@ class ShopItemViewModel:ViewModel() {
     }
 
     private fun finishWork(){
-        _closeScreen.value = Unit
+        _closeScreen.postValue(Unit)
     }
+
+
 
 
 }
