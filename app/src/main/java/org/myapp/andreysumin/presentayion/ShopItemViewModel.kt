@@ -61,7 +61,7 @@ class ShopItemViewModel(application: Application): AndroidViewModel(application)
             if (fieldsValid) {
                 scope.launch {
                     val shopItem = ShopItem(name,size,true)
-                    addShopItemUseCase.addShopListItem(shopItem)
+                     addShopItemUseCase.addShopListItem(shopItem)
                     finishWork()
                 }
             }

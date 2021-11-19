@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [ShopItemDbModel::class],views = [],version = 1,exportSchema = false)
+@Database(entities = [ShopItemDbModel::class],views = [],version = 3,exportSchema = false)
 abstract class AppDataBase :RoomDatabase(){
 
     abstract fun shopListDao():ShopItemDao
@@ -28,7 +28,8 @@ abstract class AppDataBase :RoomDatabase(){
                 application,
                 AppDataBase::class.java,
                 DATABASE_NAME
-            ).build()
+            )//метод позволяет работать в главном потоке.allowMainThreadQueries()
+                .fallbackToDestructiveMigration().build()
             INSTANSE = db
             return db
         }
